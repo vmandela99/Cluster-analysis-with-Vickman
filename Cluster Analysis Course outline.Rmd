@@ -1,0 +1,119 @@
+---
+title: "Cluster Analysis outline"
+author: "Victor Mandela"
+date: "January 7, 2020"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+ 
+```{r}
+library(tidyverse)
+theme_set(theme_light())
+```
+
+## Defination
+
+Clustering is a form of exploratory data analysis (EDA) where observations are divided into meaningful groups that share common characteristics (features).
+
+## The flow of cluster analysis
+
+1. Pre-processing
+
+   - no missing values
+   
+   - features in similar scale
+   
+2. Select similarity measures
+
+3. Clustering method
+
+4. Analyse
+
+Market segmentation and pattern grouping are good examples where cluster analysis applies.
+
+## Examples
+
+```{r}
+# Two players
+
+two_players <- as.data.frame(list(x=c(0,9),y=c(0,12)))
+
+#plot the the position of the two players
+
+ggplot(two_players,aes(x=x,y=y)) + geom_point(size =4, shape = 7) + scale_x_continuous(limits = c(0,12))
+```
+
+Distance = 1 - similarity
+
+We use the euclidean distance in this case to find the distance.
+
+Note: The larger the distance indicates the dissimilarity between observations.
+
+### Three players
+
+With more than two observations it can be tiresome calculating the euclidean distance manually, thats why we introduce the 'dist()'
+ function. The method in this case would be 'euclidean'.
+ 
+```{r}
+three_players <- as.data.frame(list(x = c(0,9,-2), y = c(0,12,19)))
+
+rownames(three_players) <- c("Ronaldo", "Gabriel", "Messi")
+
+#plot the players
+ggplot(three_players,aes(x = x, y = y)) + geom_point(size = 4) + scale_x_continuous(limits = c(-4,10)) + scale_y_continuous(limits = c(0,20))
+
+```
+
+In this case we will use the 'dist()' function.
+
+```{r}
+# Find the distance
+dist(three_players)
+
+```
+
+## Different scales
+
+The importance of scaling the data is to *standardize* our feature to a mean of zero and a standard deviation of 1. (Normalizing the data!!!)
+
+
+
+## Example2
+
+We are going to use the 'Nutrient' dataset from the 'flexclust' package.
+
+```{r}
+library(flexclust)
+data("nutrient");nutrient
+```
+
+Since the data has different measurement units we need to scale.
+
+```{r}
+scale(nutrient)
+```
+
+## Hierarchical clustering
+
+We compare more than two observation. 
+
+```{r}
+dist_nutrient <- dist(nutrient, method = "euclidean")
+hc_nutrient <- hclust(dist_nutrient, method = "complete")
+```
+
+# Extract K clusters
+
+```{r}
+
+clusters_assignment <- cutree(hc_nutrient,k = 2)
+
+#Create a  new column
+nutrient_clustered <- mutate(nutrient, cluster = clusters_assignment)
+
+#visualize the clusters
+ggplot(nutrient_clustered, aes(x = protein, y = iron, color = factor(cluster))) + geom_point()
+```
+
+
